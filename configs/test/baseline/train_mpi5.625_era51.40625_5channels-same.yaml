@@ -1,0 +1,25 @@
+test_dataset:
+  dataset:
+    name: paired-weather-numpy-folders
+    args:
+      root_path_1: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/test
+      root_path_2: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/test
+      split_1: in
+      split_2: out
+      per_num_samples: 45
+      repeat: 1
+      cache: in_memory
+  wrapper:
+    name: sr-implicit-paired-same
+    args:
+      mean_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/normalize_mean_output.npz
+      std_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/normalize_std_output.npz
+      lat_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/lat.npy
+      lon_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/lon.npy
+  batch_size: 1
+  
+var_names: ['t2m', 'u10', 'v10', 'z500', 't850']
+
+data_norm:
+  inp: {sub: [0], div: [1]}
+  gt: {sub: [0], div: [1]}

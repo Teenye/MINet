@@ -1,0 +1,74 @@
+train_dataset:
+  dataset:
+    name: paired-weather-numpy-folders
+    args:
+      root_path_1: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/train
+      root_path_2: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/train
+      split_1: in
+      split_2: out
+      per_num_samples: 45 # 每一个npz文件含的样本数，如这里是1440除以32=45
+      repeat: 1
+      cache: in_memory
+  wrapper:
+    name: sr-implicit-paired
+    args:
+      mean_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/normalize_mean_output.npz
+      std_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/normalize_std_output.npz
+      lat_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/lat.npy
+      lon_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/lon.npy
+  batch_size: 8
+
+val_dataset:
+  dataset:
+    name: paired-weather-numpy-folders
+    args:
+      root_path_1: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/test
+      root_path_2: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/test
+      split_1: in
+      split_2: out
+      per_num_samples: 45 # 每一个npz文件含的样本数，如这里是1440除以32=45
+      repeat: 1
+      cache: in_memory
+  wrapper:
+    name: sr-implicit-paired
+    args:
+      mean_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/normalize_mean_output.npz
+      std_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/normalize_std_output.npz
+      lat_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/lat.npy
+      lon_path: /data1/tengyue/data/weather-air/npz/downscale_mpi_5.625_era5_1.40625_5channels/lon.npy
+  batch_size: 1
+
+
+var_names: ['t2m', 'u10', 'v10', 'z500', 't850'] # 简写的变量名
+
+data_norm:
+  inp: {sub: [0], div: [1]}
+  gt: {sub: [0], div: [1]}
+
+model:
+  name: minet
+  args:
+    encoder_spec:
+      name: rdn
+      args:
+        n_colors: 5 # 输入通道数，五个变量五个通道
+        no_upsampling: true
+    imnet_spec:
+      name: mlp
+      args:
+        out_dim: 5 # 输出通道数，五个变量五个通道
+        hidden_list: [256, 256, 256, 256]
+
+optimizer:
+  name: adam
+  args:
+    lr: 2.e-3
+epoch_max: 30
+multi_step_lr:
+  milestones: [10,20]
+  gamma: 0.5
+
+epoch_val: 1
+epoch_save: 100
+
+resume: ./save/_train_mpi5.625_era51.40625_5channels_rdn-minet/epoch-last.pth
